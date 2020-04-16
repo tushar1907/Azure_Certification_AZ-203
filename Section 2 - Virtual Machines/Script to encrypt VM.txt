@@ -1,0 +1,18 @@
+# Define required information for our Key Vault and keys
+$keyVault = Get-AzKeyVault -VaultName "azsjdkeysvault" -ResourceGroupName "cloud-shell-storage-eastus";
+$diskEncryptionKeyVaultUrl = $keyVault.VaultUri;
+$keyVaultResourceId = $keyVault.ResourceId;
+$keyEncryptionKeyUrl = (Get-AzKeyVaultKey -VaultName "azsjdkeysvault" -Name "aztusdiskencryption").Key.kid;
+
+# Encrypt our virtual machine
+Set-AzVMDiskEncryptionExtension `
+    -ResourceGroupName "cloud-shell-storage-eastus" `
+    -VMName "az203newvm" `
+    -DiskEncryptionKeyVaultUrl $diskEncryptionKeyVaultUrl `
+    -DiskEncryptionKeyVaultId $keyVaultResourceId `
+    -KeyEncryptionKeyUrl $keyEncryptionKeyUrl `
+    -KeyEncryptionKeyVaultId $keyVaultResourceId
+
+
+# View encryption status
+Get-AzVmDiskEncryptionStatus  -ResourceGroupName $rgName -VMName $vmName
